@@ -1,0 +1,102 @@
+{
+  "projectType": "saas",
+  "projectName": "Tykode",
+  "projectDescription": "Modern web platform offering professional digital solutions for businesses in French Guiana.",
+  "theme": "almond",
+  "primaryColor": "#10b981",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Services",
+            "pages": [
+              "services/overview",
+              "services/websites",
+              "services/mobile-apps",
+              "services/ecommerce",
+              "services/custom-software",
+              "services/visual-identity",
+              "services/digital-marketing",
+              "services/automation-ai",
+              "services/consulting",
+              "services/maintenance-security"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/user-dashboard",
+              "features/profile-management",
+              "features/theme-customization",
+              "features/contact-form"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/getting-started",
+              "guides/managing-account",
+              "guides/requesting-services",
+              "guides/best-practices"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/introduction",
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/contact",
+              "api/user"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "User authentication with Better-Auth",
+    "User dashboard and profile management",
+    "Multiple service offerings showcase",
+    "Contact form with email integration",
+    "Dark/light theme toggle",
+    "Responsive mobile-first design",
+    "tRPC API with Prisma ORM",
+    "PostgreSQL database with Supabase",
+    "Next.js 15 with React 19",
+    "Turborepo monorepo architecture"
+  ],
+  "publicApiSurface": [
+    "POST /api/auth/sign-in - User authentication",
+    "POST /api/auth/sign-up - User registration",
+    "POST /api/auth/reset-password - Password reset",
+    "POST /api/trpc/contact.send - Send contact form",
+    "GET /api/auth/session - Get current user session",
+    "/services/* - Service detail pages",
+    "/contact - Contact form page",
+    "/cgv - Terms and conditions",
+    "/mentions-legales - Legal notices",
+    "/confidentialite - Privacy policy"
+  ]
+}
