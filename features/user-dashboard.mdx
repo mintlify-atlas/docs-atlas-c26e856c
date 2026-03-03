@@ -1,0 +1,116 @@
+---
+title: "User Dashboard"
+description: "Overview of the user dashboard and main workspace"
+---
+
+The user dashboard is your central hub for managing your account, viewing activity, and accessing key features of the Tykode platform.
+
+## Accessing the Dashboard
+
+Once authenticated, you can access your dashboard through:
+
+<Steps>
+  <Step title="Sign in to your account">
+    Navigate to the login page and enter your credentials. Tykode uses Better-Auth for secure authentication.
+  </Step>
+  <Step title="Navigate to dashboard">
+    After successful authentication, you'll be automatically redirected to your dashboard at `/dashboard`.
+  </Step>
+</Steps>
+
+## Dashboard Overview
+
+The dashboard provides a clean, organized view of your account and activities:
+
+### Main Components
+
+**Navigation Header**
+- Quick access to all main sections
+- User profile menu in the top-right corner
+- Theme toggle for dark/light mode preferences
+- Responsive mobile menu for smaller screens
+
+**Activity Summary**
+- Recent account activity
+- Quick stats and metrics
+- Notifications and updates
+
+**Quick Actions**
+- Shortcuts to frequently used features
+- Access to account settings
+- Contact support options
+
+## Key Features
+
+### Responsive Design
+
+The dashboard is fully responsive and adapts to all screen sizes:
+
+- **Desktop**: Full sidebar navigation with expanded views
+- **Tablet**: Collapsible navigation with optimized layouts
+- **Mobile**: Bottom navigation or hamburger menu for easy access
+
+<Note>
+  The dashboard uses Next.js 15's App Router for optimal performance and smooth navigation between sections.
+</Note>
+
+### Real-time Updates
+
+Thanks to tRPC integration, the dashboard provides:
+
+- Live data synchronization
+- Instant updates without page refreshes
+- Optimistic UI updates for better user experience
+
+### Performance
+
+Built with React 19 and Next.js 15, the dashboard offers:
+
+- Fast page loads with Server Components
+- Efficient client-side navigation
+- Optimized bundle sizes
+- Smooth transitions and animations
+
+## Navigation
+
+The dashboard navigation is organized into logical sections:
+
+- **Home**: Overview and quick stats
+- **Profile**: Manage your account settings
+- **Settings**: Configure preferences and options
+- **Support**: Access help resources and contact forms
+
+<Info>
+  Use keyboard shortcuts for faster navigation. Press `?` to view available shortcuts.
+</Info>
+
+## Best Practices
+
+<Card title="Dashboard Tips" icon="lightbulb">
+  - Keep your dashboard organized by customizing which widgets you see
+  - Check notifications regularly for important updates
+  - Use the search function to quickly find what you need
+  - Customize your theme preference for comfortable viewing
+</Card>
+
+## Customization
+
+Personalize your dashboard experience:
+
+1. **Theme**: Switch between light and dark modes
+2. **Layout**: Arrange widgets based on your preferences
+3. **Notifications**: Configure which alerts you receive
+4. **Language**: Select your preferred language (if applicable)
+
+## Security
+
+Your dashboard session is protected by:
+
+- Better-Auth session management
+- Automatic logout after inactivity
+- Secure token-based authentication
+- HTTPS encryption for all data transmission
+
+<Note>
+  Always log out when using shared or public computers to protect your account.
+</Note>

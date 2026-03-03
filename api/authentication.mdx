@@ -1,0 +1,603 @@
+---
+title: 'Authentication'
+description: 'Complete guide to Better Auth authentication endpoints and session management'
+icon: 'key'
+---
+
+## Overview
+
+Tykode uses **Better Auth v1.2.7** for authentication, providing a secure, session-based authentication system with email and password support. All authentication endpoints are REST-based and available at `/api/auth`.
+
+<Info>
+  Better Auth handles authentication separately from tRPC. Auth endpoints use standard REST conventions, not tRPC's JSON-RPC protocol.
+</Info>
+
+## Authentication Configuration
+
+The authentication system is configured with:
+
+- **Database**: PostgreSQL via Prisma adapter
+- **Session Storage**: Database-backed sessions
+- **Auth Method**: Email and password
+- **CORS**: Configured for cross-origin authentication
+- **Trusted Origins**: Defined via `CORS_ORIGIN` environment variable
+
+**Source**: `/home/daytona/workspace/source/apps/server/src/lib/auth.ts:5-13`
+
+```typescript
+export const auth = betterAuth({
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+  trustedOrigins: [process.env.CORS_ORIGIN || ""],
+  emailAndPassword: {
+    enabled: true,
+  },
+});
+```
+
+## Base URL
+
+All authentication endpoints are prefixed with:
+
+```
+{BASE_URL}/api/auth
+```
+
+Example: `http://localhost:3003/api/auth`
+
+## Authentication Endpoints
+
+Better Auth provides the following REST endpoints. All endpoints are handled by the Better Auth handler:
+
+**Handler Source**: `/home/daytona/workspace/source/apps/server/src/app/api/auth/[...all]/route.ts:4`
+
+### Sign Up
+
+Create a new user account with email and password.
+
+<ParamField path="POST /api/auth/sign-up" type="endpoint">
+  Register a new user account
+</ParamField>
+
+#### Request Body
+
+<ParamField body="email" type="string" required>
+  User's email address. Must be a valid email format.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password. Should meet minimum security requirements.
+</ParamField>
+
+<ParamField body="name" type="string">
+  User's display name (if supported by your schema)
+</ParamField>
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3003/api/auth/sign-up \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  --data '{
+    "email": "user@example.com",
+    "password": "SecurePassword123!",
+    "name": "John Doe"
+  }'
+```
+
+#### Response
+
+<ResponseField name="user" type="object">
+  The created user object
+  
+  <Expandable title="User object properties">
+    <ResponseField name="id" type="string">
+      Unique user identifier
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      User's email address
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User's display name
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of account creation
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="session" type="object">
+  Session information (set as HTTP-only cookie)
+  
+  <Expandable title="Session object properties">
+    <ResponseField name="token" type="string">
+      Session token (stored in cookie)
+    </ResponseField>
+    
+    <ResponseField name="expiresAt" type="string">
+      ISO 8601 timestamp of session expiration
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```json
+{
+  "user": {
+    "id": "cm1a2b3c4d5e6f7g8h9i0",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "createdAt": "2026-03-03T10:30:00.000Z"
+  },
+  "session": {
+    "token": "session_token_here",
+    "expiresAt": "2026-03-17T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+### Sign In
+
+Authenticate an existing user with email and password.
+
+<ParamField path="POST /api/auth/sign-in" type="endpoint">
+  Authenticate with email and password
+</ParamField>
+
+#### Request Body
+
+<ParamField body="email" type="string" required>
+  User's email address
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password
+</ParamField>
+
+<ParamField body="rememberMe" type="boolean" default={false}>
+  Whether to extend session duration
+</ParamField>
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3003/api/auth/sign-in \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  --data '{
+    "email": "user@example.com",
+    "password": "SecurePassword123!",
+    "rememberMe": true
+  }'
+```
+
+#### Response
+
+<ResponseField name="user" type="object">
+  The authenticated user object
+</ResponseField>
+
+<ResponseField name="session" type="object">
+  Session information (set as HTTP-only cookie)
+</ResponseField>
+
+```json
+{
+  "user": {
+    "id": "cm1a2b3c4d5e6f7g8h9i0",
+    "email": "user@example.com",
+    "name": "John Doe"
+  },
+  "session": {
+    "token": "session_token_here",
+    "expiresAt": "2026-03-17T10:30:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+<ResponseField name="401 Unauthorized" type="error">
+  Invalid email or password
+</ResponseField>
+
+```json
+{
+  "error": {
+    "message": "Invalid email or password",
+    "code": "INVALID_CREDENTIALS"
+  }
+}
+```
+
+---
+
+### Sign Out
+
+Terminate the current user session.
+
+<ParamField path="POST /api/auth/sign-out" type="endpoint">
+  End the current session and clear cookies
+</ParamField>
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3003/api/auth/sign-out \
+  -b cookies.txt \
+  -c cookies.txt
+```
+
+#### Response
+
+```json
+{
+  "success": true
+}
+```
+
+<Info>
+  The session cookie will be cleared automatically. No request body is required.
+</Info>
+
+---
+
+### Get Session
+
+Retrieve the current authenticated session.
+
+<ParamField path="GET /api/auth/get-session" type="endpoint">
+  Get current session information
+</ParamField>
+
+#### Example Request
+
+```bash
+curl http://localhost:3003/api/auth/get-session \
+  -b cookies.txt
+```
+
+#### Response (Authenticated)
+
+<ResponseField name="session" type="object">
+  Current session data
+  
+  <Expandable title="Session properties">
+    <ResponseField name="user" type="object">
+      Authenticated user information
+    </ResponseField>
+    
+    <ResponseField name="token" type="string">
+      Session token
+    </ResponseField>
+    
+    <ResponseField name="expiresAt" type="string">
+      Session expiration timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```json
+{
+  "session": {
+    "user": {
+      "id": "cm1a2b3c4d5e6f7g8h9i0",
+      "email": "user@example.com",
+      "name": "John Doe"
+    },
+    "token": "session_token_here",
+    "expiresAt": "2026-03-17T10:30:00.000Z"
+  }
+}
+```
+
+#### Response (Not Authenticated)
+
+```json
+{
+  "session": null
+}
+```
+
+---
+
+### Forgot Password
+
+Initiate a password reset flow.
+
+<ParamField path="POST /api/auth/forgot-password" type="endpoint">
+  Request a password reset email
+</ParamField>
+
+#### Request Body
+
+<ParamField body="email" type="string" required>
+  Email address of the account to reset
+</ParamField>
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3003/api/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  --data '{
+    "email": "user@example.com"
+  }'
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "message": "If an account exists with this email, a reset link has been sent."
+}
+```
+
+<Warning>
+  For security reasons, the response is the same whether the email exists or not.
+</Warning>
+
+---
+
+### Reset Password
+
+Complete the password reset with a valid token.
+
+<ParamField path="POST /api/auth/reset-password" type="endpoint">
+  Reset password with a valid reset token
+</ParamField>
+
+#### Request Body
+
+<ParamField body="token" type="string" required>
+  Password reset token from email
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  New password
+</ParamField>
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3003/api/auth/reset-password \
+  -H "Content-Type: application/json" \
+  --data '{
+    "token": "reset_token_from_email",
+    "password": "NewSecurePassword123!"
+  }'
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "message": "Password has been reset successfully"
+}
+```
+
+## Session Management
+
+Sessions are managed automatically by Better Auth using HTTP-only cookies.
+
+### Session Context in tRPC
+
+The session is automatically injected into tRPC context for all requests:
+
+```typescript
+export async function createContext(req: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: req.headers,
+  });
+  return {
+    session,
+  };
+}
+```
+
+**Source**: `/home/daytona/workspace/source/apps/server/src/lib/context.ts:4-11`
+
+### Protected Procedures
+
+Protected tRPC procedures automatically verify the session:
+
+```typescript
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.session) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Authentication required",
+      cause: "No session",
+    });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      session: ctx.session,
+    },
+  });
+});
+```
+
+**Source**: `/home/daytona/workspace/source/apps/server/src/lib/trpc.ts:10-24`
+
+## Authentication Headers
+
+All authenticated requests must include credentials:
+
+### Required Headers
+
+<ParamField header="Cookie" type="string" required>
+  Session cookie set by Better Auth (automatically included by browsers)
+</ParamField>
+
+<ParamField header="Content-Type" type="string" default="application/json">
+  Must be set to `application/json` for POST requests
+</ParamField>
+
+### CORS Requirements
+
+When making requests from a different origin:
+
+1. **Include credentials**: Set `credentials: 'include'` in fetch requests
+2. **Match trusted origin**: Origin must match `CORS_ORIGIN` environment variable
+3. **Use proper headers**: See CORS configuration in [API Introduction](/api/introduction#cors-configuration)
+
+## Frontend Integration
+
+### Making Authenticated Requests
+
+The tRPC client automatically includes credentials:
+
+```typescript
+import { trpc } from '@/utils/trpc';
+
+// This will automatically include session cookie
+const { data } = trpc.privateData.useQuery();
+```
+
+### Checking Authentication Status
+
+```typescript
+// Call Better Auth's get-session endpoint
+const checkAuth = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/get-session`,
+    {
+      credentials: 'include',
+    }
+  );
+  const { session } = await response.json();
+  return session;
+};
+```
+
+## Error Codes
+
+Better Auth uses the following error codes:
+
+<ResponseField name="INVALID_CREDENTIALS" type="error">
+  Email or password is incorrect during sign-in.
+  
+  **HTTP Status**: 401
+</ResponseField>
+
+<ResponseField name="EMAIL_ALREADY_EXISTS" type="error">
+  Email is already registered during sign-up.
+  
+  **HTTP Status**: 400
+</ResponseField>
+
+<ResponseField name="INVALID_TOKEN" type="error">
+  Password reset token is invalid or expired.
+  
+  **HTTP Status**: 400
+</ResponseField>
+
+<ResponseField name="SESSION_EXPIRED" type="error">
+  Session has expired and user needs to sign in again.
+  
+  **HTTP Status**: 401
+</ResponseField>
+
+<ResponseField name="UNAUTHORIZED" type="error">
+  No valid session found when accessing protected endpoint.
+  
+  **HTTP Status**: 401
+</ResponseField>
+
+## Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use HTTPS in Production" icon="lock">
+    Always use HTTPS in production to protect session cookies and credentials from interception.
+    
+    Session cookies should have the `Secure` flag set automatically in production.
+  </Accordion>
+
+  <Accordion title="Implement Password Requirements" icon="shield-check">
+    Enforce strong password policies:
+    - Minimum 8 characters
+    - Mix of uppercase, lowercase, numbers, and symbols
+    - Check against common password lists
+  </Accordion>
+
+  <Accordion title="Handle Sessions Securely" icon="cookie">
+    Better Auth uses HTTP-only cookies by default, which:
+    - Cannot be accessed via JavaScript
+    - Are sent automatically with requests
+    - Protect against XSS attacks
+  </Accordion>
+
+  <Accordion title="Configure CORS Properly" icon="globe">
+    Only allow trusted origins in the `CORS_ORIGIN` environment variable.
+    
+    Never use `*` for credentials-based authentication.
+  </Accordion>
+
+  <Accordion title="Monitor Failed Attempts" icon="eye">
+    Implement rate limiting on authentication endpoints to prevent:
+    - Brute force attacks
+    - Credential stuffing
+    - Account enumeration
+  </Accordion>
+</AccordionGroup>
+
+## Example: Complete Authentication Flow
+
+Here's a complete example of signing up, signing in, making an authenticated request, and signing out:
+
+```bash
+#!/bin/bash
+
+# 1. Sign up
+curl -X POST http://localhost:3003/api/auth/sign-up \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  --data '{
+    "email": "test@example.com",
+    "password": "SecurePass123!",
+    "name": "Test User"
+  }'
+
+# 2. Make an authenticated tRPC request
+curl http://localhost:3003/trpc/privateData \
+  -b cookies.txt
+
+# 3. Check session
+curl http://localhost:3003/api/auth/get-session \
+  -b cookies.txt
+
+# 4. Sign out
+curl -X POST http://localhost:3003/api/auth/sign-out \
+  -b cookies.txt \
+  -c cookies.txt
+
+# 5. Verify session is cleared
+curl http://localhost:3003/api/auth/get-session \
+  -b cookies.txt
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User API" icon="user" href="/api/user">
+    Learn how to work with protected user data and procedures
+  </Card>
+  
+  <Card title="Contact API" icon="envelope" href="/api/contact">
+    Public endpoint example with validation and rate limiting
+  </Card>
+  
+  <Card title="API Introduction" icon="book" href="/api/introduction">
+    Back to API overview and architecture
+  </Card>
+</CardGroup>

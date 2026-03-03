@@ -1,0 +1,297 @@
+---
+title: 'API Introduction'
+description: 'Overview of the Tykode API architecture, endpoints, and core concepts'
+icon: 'code'
+---
+
+## Overview
+
+The Tykode API provides a modern, type-safe backend built with **tRPC** and **Better Auth**. The API follows a dual-protocol architecture:
+
+- **tRPC endpoints** for application logic and data operations
+- **Better Auth REST endpoints** for authentication flows
+
+All endpoints support CORS with credentials and use session-based authentication.
+
+## API Architecture
+
+### Base URLs
+
+The API is accessible at the following base URLs:
+
+<ParamField path="Base URL" type="string" default="http://localhost:3003">
+  Default development server URL. Production URLs will vary by deployment.
+</ParamField>
+
+- **tRPC Endpoint**: `{BASE_URL}/trpc`
+- **Authentication Endpoint**: `{BASE_URL}/api/auth`
+- **Health Check**: `{BASE_URL}/` (returns `{"message": "OK"}`)
+
+### Protocol Types
+
+#### 1. tRPC API
+
+Tykode uses tRPC v11 for type-safe API calls. All tRPC endpoints are available at `/trpc` and support:
+
+- **Queries** - For data fetching (GET-like operations)
+- **Mutations** - For data modification (POST/PUT/DELETE-like operations)
+- **Batch requests** - Multiple operations in a single HTTP request
+- **Type safety** - Full TypeScript types from server to client
+
+#### 2. Better Auth REST API
+
+Authentication is handled by Better Auth v1.2.7, providing standard REST endpoints at `/api/auth` for:
+
+- User registration and sign-in
+- Session management
+- Password reset flows
+- Email verification
+
+<Info>
+  Better Auth endpoints follow REST conventions, while tRPC endpoints use JSON-RPC protocol.
+</Info>
+
+## Available Endpoints
+
+### tRPC Endpoints
+
+The following tRPC procedures are available:
+
+<AccordionGroup>
+  <Accordion title="healthCheck (Public Query)" icon="heart-pulse">
+    Returns server health status.
+    
+    **Type**: Query (Public)
+    
+    **Returns**: `"OK"`
+    
+    **Source**: `/home/daytona/workspace/source/apps/server/src/routers/index.ts:5`
+  </Accordion>
+
+  <Accordion title="privateData (Protected Query)" icon="lock">
+    Returns private user data. Requires authentication.
+    
+    **Type**: Query (Protected)
+    
+    **Returns**: 
+    ```typescript
+    {
+      message: string;
+      user: {
+        id: string;
+        email: string;
+        // ... other user fields
+      };
+    }
+    ```
+    
+    **Source**: `/home/daytona/workspace/source/apps/server/src/routers/index.ts:8`
+  </Accordion>
+
+  <Accordion title="contact.submit (Public Mutation)" icon="envelope">
+    Submit a contact form message with spam protection.
+    
+    **Type**: Mutation (Public)
+    
+    **Rate Limit**: 3 requests per hour per email address
+    
+    See the full schema in the Contact API documentation.
+    
+    **Source**: `/home/daytona/workspace/source/apps/server/src/routers/contact.ts:62`
+  </Accordion>
+</AccordionGroup>
+
+## Authentication
+
+All protected endpoints require a valid session. Authentication is handled via:
+
+1. **Session cookies** - Set automatically by Better Auth
+2. **Credentials mode** - All requests must include `credentials: 'include'`
+3. **CORS headers** - Properly configured for cross-origin requests
+
+See the [Authentication](/api/authentication) page for detailed information on auth endpoints and flows.
+
+## Making Requests
+
+### Using the tRPC Client (Recommended)
+
+The type-safe way to call the API from your frontend:
+
+```typescript
+import { trpc } from '@/utils/trpc';
+
+// Query example
+const { data } = trpc.healthCheck.useQuery();
+
+// Mutation example
+const { mutate } = trpc.contact.submit.useMutation();
+mutate({
+  name: 'John Doe',
+  email: 'john@example.com',
+  subject: 'Question about your service',
+  message: 'I would like to know more about...',
+  acceptPrivacy: true,
+});
+```
+
+### Using Direct HTTP Requests
+
+For non-TypeScript clients or testing:
+
+```bash
+# Health check
+curl http://localhost:3003/trpc/healthCheck
+
+# Batch request example
+curl -X POST http://localhost:3003/trpc/healthCheck,privateData \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  --data '{"0":{},"1":{}}'
+```
+
+<Warning>
+  Direct HTTP requests to tRPC endpoints require understanding the JSON-RPC protocol. Use the tRPC client for the best experience.
+</Warning>
+
+## Rate Limiting
+
+The API implements rate limiting on specific endpoints:
+
+### Contact Form Rate Limit
+
+- **Limit**: 3 submissions per hour
+- **Key**: Email address
+- **Storage**: In-memory (resets on server restart)
+- **Error Code**: `TOO_MANY_REQUESTS`
+- **Message**: "Vous avez envoyé trop de messages. Veuillez réessayer dans une heure."
+
+**Implementation**: `/home/daytona/workspace/source/apps/server/src/routers/contact.ts:14-34`
+
+## Error Handling
+
+### tRPC Error Codes
+
+The API uses standard tRPC error codes:
+
+<ResponseField name="UNAUTHORIZED" type="error">
+  Authentication required but no valid session provided.
+  
+  **HTTP Status**: 401
+</ResponseField>
+
+<ResponseField name="BAD_REQUEST" type="error">
+  Invalid input data. Check validation errors in the error message.
+  
+  **HTTP Status**: 400
+</ResponseField>
+
+<ResponseField name="INTERNAL_SERVER_ERROR" type="error">
+  Server-side error occurred. Check server logs for details.
+  
+  **HTTP Status**: 500
+</ResponseField>
+
+<ResponseField name="TOO_MANY_REQUESTS" type="error">
+  Rate limit exceeded. Wait before retrying.
+  
+  **HTTP Status**: 429
+</ResponseField>
+
+### Error Response Format
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication required",
+    "data": {
+      "code": "UNAUTHORIZED",
+      "httpStatus": 401,
+      "path": "privateData"
+    }
+  }
+}
+```
+
+## CORS Configuration
+
+The API supports cross-origin requests with the following configuration:
+
+- **Allowed Origin**: Configured via `CORS_ORIGIN` environment variable
+- **Credentials**: Required (`Access-Control-Allow-Credentials: true`)
+- **Methods**: `GET`, `POST`, `OPTIONS`
+- **Headers**: `Content-Type`, `Authorization`
+
+**Source**: `/home/daytona/workspace/source/apps/server/src/middleware.ts:1-42`
+
+## Client Configuration
+
+### Frontend Setup
+
+The tRPC client is configured to:
+
+1. Use HTTP batch link for request optimization
+2. Include credentials automatically
+3. Handle errors with toast notifications
+4. Integrate with React Query for caching
+
+```typescript
+// Client configuration
+const trpcClient = createTRPCClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: `${process.env.NEXT_PUBLIC_SERVER_URL}/trpc`,
+      fetch(url, options) {
+        return fetch(url, {
+          ...options,
+          credentials: 'include',
+        });
+      },
+    }),
+  ],
+});
+```
+
+**Source**: `/home/daytona/workspace/source/apps/web/src/utils/trpc.ts:22-34`
+
+## Environment Variables
+
+### Server Configuration
+
+<ParamField path="DATABASE_URL" type="string" required>
+  PostgreSQL connection string for Prisma
+</ParamField>
+
+<ParamField path="CORS_ORIGIN" type="string" required>
+  Allowed origin for CORS requests (e.g., `http://localhost:3001`)
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_SUPABASE_URL" type="string">
+  Supabase project URL for contact form storage
+</ParamField>
+
+<ParamField path="SUPABASE_SERVICE_ROLE_KEY" type="string">
+  Supabase service role key for server-side operations
+</ParamField>
+
+### Client Configuration
+
+<ParamField path="NEXT_PUBLIC_SERVER_URL" type="string" required>
+  Backend API base URL (e.g., `http://localhost:3003`)
+</ParamField>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api/authentication">
+    Learn about Better Auth endpoints and session management
+  </Card>
+  
+  <Card title="Contact API" icon="envelope" href="/api/contact">
+    Detailed documentation for the contact form endpoint
+  </Card>
+  
+  <Card title="User API" icon="user" href="/api/user">
+    Understanding authentication and protected user procedures
+  </Card>
+</CardGroup>

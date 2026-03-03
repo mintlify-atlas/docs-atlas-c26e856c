@@ -1,0 +1,190 @@
+---
+title: "Contact API"
+description: "Submit contact form messages through the Tykode contact API endpoint"
+---
+
+## Overview
+
+The Contact API allows users to submit contact form messages which are stored in Supabase. It includes built-in spam protection via honeypot field and rate limiting (3 messages per hour per email address).
+
+## Endpoint
+
+### contact.submit
+
+Submits a new contact form message.
+
+<CodeGroup>
+```typescript Client Usage
+import { trpc } from "~/lib/trpc";
+
+const result = await trpc.contact.submit.mutate({
+  name: "John Doe",
+  email: "john@example.com",
+  company: "Acme Inc.",
+  phone: "+1234567890",
+  subject: "Project Inquiry",
+  message: "I would like to discuss a new web development project...",
+  acceptPrivacy: true,
+  website: "" // Honeypot field - must remain empty
+});
+
+console.log(result.message); // "Votre message a été envoyé avec succès !..."
+```
+
+```typescript With Error Handling
+import { trpc } from "~/lib/trpc";
+import { TRPCClientError } from "@trpc/client";
+
+try {
+  const result = await trpc.contact.submit.mutate({
+    name: "John Doe",
+    email: "john@example.com",
+    subject: "Project Inquiry",
+    message: "I would like to discuss a new web development project with your team.",
+    acceptPrivacy: true,
+    website: ""
+  });
+  
+  if (result.success) {
+    console.log("Message sent successfully!");
+  }
+} catch (error) {
+  if (error instanceof TRPCClientError) {
+    if (error.data?.code === "TOO_MANY_REQUESTS") {
+      console.error("Rate limit exceeded. Try again in an hour.");
+    } else {
+      console.error("Failed to send message:", error.message);
+    }
+  }
+}
+```
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField path="name" type="string" required>
+  Sender's full name. Must be between 2 and 100 characters.
+</ParamField>
+
+<ParamField path="email" type="string" required>
+  Valid email address. Maximum 255 characters.
+</ParamField>
+
+<ParamField path="company" type="string">
+  Company or organization name. Maximum 100 characters. Optional.
+</ParamField>
+
+<ParamField path="phone" type="string">
+  Phone number. Maximum 20 characters. Optional.
+</ParamField>
+
+<ParamField path="subject" type="string" required>
+  Message subject. Must be between 5 and 200 characters.
+</ParamField>
+
+<ParamField path="message" type="string" required>
+  Message content. Must be between 20 and 5000 characters.
+  
+  The message can include structured information that will be automatically parsed:
+  - `Type de projet: [value]` - Extracted as project_type
+  - `Budget: [value]` - Extracted as budget
+  - `Délai: [value]` - Extracted as timeline
+</ParamField>
+
+<ParamField path="acceptPrivacy" type="boolean" required>
+  Privacy policy acceptance. Must be `true`.
+</ParamField>
+
+<ParamField path="website" type="string">
+  Honeypot field for spam protection. **Must remain empty.** If filled, the submission will be silently ignored.
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates whether the message was successfully submitted.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Success message to display to the user.
+  
+  Default: `"Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."`
+</ResponseField>
+
+## Error Codes
+
+The Contact API uses standard tRPC error codes:
+
+| Code | Description | Solution |
+|------|-------------|----------|
+| `TOO_MANY_REQUESTS` | Rate limit exceeded (3 messages/hour per email) | Wait an hour before submitting again |
+| `INTERNAL_SERVER_ERROR` | Supabase configuration error or database failure | Contact support or try again later |
+| `BAD_REQUEST` | Validation error (invalid email, message too short, etc.) | Check input validation requirements |
+
+## Validation Rules
+
+### Name
+- Minimum length: 2 characters
+- Maximum length: 100 characters
+- Required field
+
+### Email
+- Must be valid email format
+- Maximum length: 255 characters
+- Required field
+- Used for rate limiting
+
+### Subject
+- Minimum length: 5 characters
+- Maximum length: 200 characters
+- Required field
+
+### Message
+- Minimum length: 20 characters
+- Maximum length: 5000 characters
+- Required field
+- Can include structured metadata (project type, budget, timeline)
+
+### Privacy Policy
+- Must be explicitly accepted (`true`)
+- Required field
+
+## Rate Limiting
+
+The contact endpoint implements in-memory rate limiting:
+
+- **Limit:** 3 messages per hour per email address
+- **Window:** 60 minutes (rolling)
+- **Scope:** Per email address
+- **Storage:** In-memory (resets on server restart)
+
+When rate limit is exceeded, a `TOO_MANY_REQUESTS` error is thrown with the message:
+```
+"Vous avez envoyé trop de messages. Veuillez réessayer dans une heure."
+```
+
+## Spam Protection
+
+### Honeypot Field
+
+The `website` field acts as a honeypot:
+- Must remain empty for legitimate submissions
+- Bots typically auto-fill all form fields
+- Submissions with filled honeypot are silently accepted but not stored
+- Returns success response to avoid bot detection
+
+### Database Storage
+
+Valid submissions are stored in Supabase `contact_messages` table with:
+- Contact information (name, email, phone, company)
+- Message content (subject, message)
+- Parsed metadata (project_type, budget, timeline)
+- Status tracking (defaults to "new")
+- Timestamp tracking
+
+## Source Code Reference
+
+The contact router implementation can be found at:
+- Router: `apps/server/src/routers/contact.ts:60`
+- Schema validation: `apps/server/src/routers/contact.ts:37`
+- Rate limiting: `apps/server/src/routers/contact.ts:19`

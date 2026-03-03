@@ -1,0 +1,381 @@
+---
+title: "Contact Form"
+description: "Get in touch with Tykode through the integrated contact form"
+---
+
+The Tykode contact form provides an easy, secure way to reach out to the team for inquiries, project discussions, or support requests.
+
+## Accessing the Contact Form
+
+You can reach the contact form in several ways:
+
+<Steps>
+  <Step title="Via navigation menu">
+    Click "Contact" in the main navigation header (visible on all pages).
+  </Step>
+  <Step title="Via call-to-action buttons">
+    Click "Prendre contact" (Take Contact) buttons found throughout the site.
+  </Step>
+  <Step title="Direct URL">
+    Navigate directly to `/contact` in your browser.
+  </Step>
+</Steps>
+
+## Contact Form Overview
+
+The contact page is divided into two main sections:
+
+**Left Side - Contact Information**
+- Phone number with business hours
+- Email addresses (contact and support)
+- Physical address
+- Social media links
+
+**Right Side - Contact Form**
+- Interactive message submission form
+- Real-time validation
+- Instant feedback on submission
+
+## Filling Out the Form
+
+<Steps>
+  <Step title="Enter your information">
+    Fill in the required fields marked with an asterisk (*):
+    - Full name (minimum 2 characters)
+    - Professional email (valid format required)
+    - Subject (minimum 5 characters)
+    - Message (minimum 20 characters)
+  </Step>
+  <Step title="Add optional details">
+    Optionally include:
+    - Company name
+    - Phone number
+  </Step>
+  <Step title="Accept privacy policy">
+    Check the box to accept the privacy policy and data processing terms.
+  </Step>
+  <Step title="Submit your message">
+    Click "Envoyer le message" (Send Message) to submit the form.
+  </Step>
+</Steps>
+
+## Form Fields
+
+### Required Fields
+
+**Full Name** (`*`)
+- Your complete name
+- Minimum 2 characters
+- Helps the team personalize their response
+
+**Professional Email** (`*`)
+- Valid email address
+- Used for response and confirmation
+- Real-time format validation
+
+**Subject** (`*`)
+- Brief description of your inquiry
+- Minimum 5 characters
+- Helps route your message appropriately
+
+**Message** (`*`)
+- Detailed description of your needs or question
+- Minimum 20 characters
+- Character counter shows progress (20 min)
+- Supports multiple lines for detailed explanations
+
+### Optional Fields
+
+**Company Name**
+- Your business or organization
+- Helps provide context for business inquiries
+
+**Phone Number**
+- Optional contact number
+- Format: +594 694 45 86 55 (or your format)
+- For urgent matters or callback requests
+
+<Note>
+  All required fields must be completed before you can submit the form.
+</Note>
+
+## Real-Time Validation
+
+The contact form includes intelligent validation to ensure your message is properly formatted:
+
+### Email Validation
+- Checks for valid email format (name@domain.com)
+- Shows error message if format is invalid
+- Validates on blur (when you leave the field)
+
+### Name Validation
+- Ensures minimum 2 characters
+- Shows remaining characters if too short
+- Validates on blur
+
+### Subject Validation
+- Requires minimum 5 characters
+- Shows how many more characters needed
+- Validates on blur
+
+### Message Validation
+- Requires minimum 20 characters for meaningful communication
+- Live character counter displays: "X/20 min"
+- Counter turns from amber to gray when requirement met
+- Validates on blur
+
+<Info>
+  Validation messages appear with a red alert icon and only show after you've interacted with each field.
+</Info>
+
+## Privacy and Security
+
+### Privacy Policy Acceptance
+
+Before submitting, you must:
+
+1. Check the privacy policy acceptance checkbox
+2. This confirms you understand how your data will be used
+3. Required for GDPR compliance
+
+### Anti-Spam Protection
+
+The form includes built-in spam protection:
+
+**Honeypot Field**
+- Hidden "website" field invisible to human users
+- Bots typically fill this field, flagging spam
+- Legitimate submissions leave it empty
+
+**Server-Side Validation**
+- All data is validated on the server
+- Prevents malicious submissions
+- Rate limiting to prevent abuse
+
+<Note>
+  Your contact information is transmitted securely and used only to respond to your inquiry.
+</Note>
+
+## Submission Process
+
+### When You Click Submit
+
+<Steps>
+  <Step title="Form validation">
+    Client-side validation checks all required fields are complete and properly formatted.
+  </Step>
+  <Step title="Sending state">
+    The submit button shows a loading spinner with "Envoi en cours..." (Sending in progress).
+  </Step>
+  <Step title="Server processing">
+    Your message is sent via tRPC to the backend for processing and storage.
+  </Step>
+  <Step title="Confirmation">
+    You receive immediate feedback on success or error.
+  </Step>
+</Steps>
+
+### Success Confirmation
+
+When your message is successfully sent:
+
+1. **Visual Confirmation**
+   - Green checkmark icon appears
+   - Success message: "Message envoyé!" (Message sent!)
+   - Thank you note confirming your message will be answered shortly
+
+2. **Form Reset**
+   - All fields are cleared
+   - Ready for another message if needed
+   - Option to "Send another message" appears
+
+3. **Toast Notification**
+   - Small notification appears at screen edge
+   - Confirms successful submission
+   - Automatically dismisses after a few seconds
+
+### Error Handling
+
+If submission fails:
+
+1. **Error Message**
+   - Red error notification appears
+   - Describes what went wrong
+   - Form data is preserved (not lost)
+
+2. **Common Errors**
+   - Missing required fields
+   - Invalid email format
+   - Network connection issues
+   - Server timeout
+
+3. **Resolution**
+   - Check highlighted fields
+   - Correct any validation errors
+   - Try submitting again
+   - Contact via phone or email if issue persists
+
+<Info>
+  If you continue experiencing submission errors, try refreshing the page or contact Tykode directly via email or phone.
+</Info>
+
+## Contact Information Display
+
+The left side of the contact page provides multiple ways to reach Tykode:
+
+### Phone Contact
+- **Number**: +594 694 45 86 55
+- **Hours**: Monday - Friday, 8am-6pm
+- Icon-based visual presentation
+
+### Email Contact
+- **General**: contact@tykode.com
+- **Support**: support@tykode.com
+- Click to open default email client
+
+### Physical Address
+- 123 Rue des Palmiers
+- 97300 Cayenne, Guyane
+- Map pin icon for easy identification
+
+### Social Media
+
+Follow Tykode on social platforms:
+- LinkedIn
+- Facebook  
+- Twitter
+
+Each platform has a hover effect (turns green) for visual feedback.
+
+## Response Time
+
+What to expect after submitting:
+
+- **Initial Response**: Within 24 hours on business days
+- **Urgent Matters**: Call directly for faster response
+- **Business Hours**: Monday-Friday, 8am-6pm (local time)
+- **Email Confirmation**: Automatic confirmation of receipt
+
+<Note>
+  For urgent inquiries, calling +594 694 45 86 55 during business hours provides the fastest response.
+</Note>
+
+## Best Practices
+
+<Card title="Contact Form Tips" icon="message-square">
+  - **Be specific**: Provide details about your project or inquiry
+  - **Include context**: Mention your industry, timeline, or budget if relevant
+  - **Use professional email**: Ensures delivery and credibility
+  - **Check spam folder**: Look for the response in spam if you don't receive it
+  - **Save confirmation**: Screenshot the success message for your records
+</Card>
+
+## Common Use Cases
+
+### New Project Inquiries
+
+When requesting a quote for a new project:
+
+- Describe your project goals and scope
+- Mention your preferred timeline
+- Include budget range if comfortable
+- Specify any technical requirements
+
+### Support Requests
+
+For technical support or issues:
+
+- Describe the problem in detail
+- Include error messages if any
+- Mention when the issue started
+- Provide browser/device information if relevant
+
+### General Questions
+
+For information about services:
+
+- Be clear about what information you need
+- Reference specific services if applicable
+- Ask about process, timeline, or pricing
+
+### Partnership Inquiries
+
+For collaboration or partnership:
+
+- Introduce your company/organization
+- Explain the partnership opportunity
+- Suggest next steps or meeting request
+
+## Troubleshooting
+
+### Form Not Submitting
+
+**Check Required Fields**
+- Ensure all fields marked with `*` are filled
+- Verify email format is correct
+- Check message meets 20 character minimum
+
+**Privacy Policy**
+- Confirm you've checked the privacy acceptance box
+- This is required to submit
+
+**Internet Connection**
+- Verify your internet connection is stable
+- Try refreshing the page
+
+### Not Receiving Response
+
+**Check Spam Folder**
+- Responses may be filtered as spam
+- Add contact@tykode.com to contacts
+
+**Verify Email Address**
+- Ensure you entered your email correctly
+- Check for typos in your email address
+
+**Wait Period**
+- Allow 24-48 hours for initial response
+- Business days only (Monday-Friday)
+
+### Validation Errors
+
+**Email Format**
+- Must include @ symbol and domain
+- Example: yourname@company.com
+
+**Message Too Short**
+- Must be at least 20 characters
+- Counter shows characters remaining
+
+**Name Too Short**
+- Must be at least 2 characters
+- Include first and last name
+
+<Info>
+  If you encounter persistent issues with the contact form, you can always reach Tykode directly via email at contact@tykode.com or by phone.
+</Info>
+
+## Accessibility
+
+The contact form is designed to be accessible to all users:
+
+- **Keyboard Navigation**: Full form completion without mouse
+- **Screen Readers**: Proper labels and ARIA attributes
+- **Error Messages**: Clear, descriptive validation feedback
+- **Focus States**: Visible indicators for current field
+- **Color Contrast**: WCAG AA compliant text contrast
+- **Auto-Complete**: Supports browser auto-fill for faster completion
+
+## Mobile Experience
+
+The contact form is fully responsive on mobile devices:
+
+- **Adaptive Layout**: Form stacks vertically on small screens
+- **Touch-Friendly**: Large tap targets for buttons and checkboxes
+- **Keyboard Optimization**: Appropriate input types (email, tel, text)
+- **Scroll Behavior**: Smooth scrolling to error fields
+- **Contact Info**: Easy-tap phone and email links
+
+<Note>
+  On mobile, the contact information section appears above the form for easy access to phone and email options.
+</Note>
