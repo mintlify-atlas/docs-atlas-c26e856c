@@ -22,11 +22,10 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Overview",
             "pages": [
               "introduction",
-              "quickstart",
-              "authentication"
+              "getting-started"
             ]
           },
           {
@@ -45,21 +44,10 @@
             ]
           },
           {
-            "group": "Features",
+            "group": "Contact & Support",
             "pages": [
-              "features/user-dashboard",
-              "features/profile-management",
-              "features/theme-customization",
-              "features/contact-form"
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              "guides/getting-started",
-              "guides/managing-account",
-              "guides/requesting-services",
-              "guides/best-practices"
+              "contact-form",
+              "requesting-services"
             ]
           }
         ]
@@ -77,8 +65,7 @@
           {
             "group": "Endpoints",
             "pages": [
-              "api/contact",
-              "api/user"
+              "api/contact"
             ]
           }
         ]
